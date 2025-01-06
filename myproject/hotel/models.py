@@ -8,7 +8,6 @@ STAR_CHOICES = [(i, str(i)) for i in range(1, 6)]
 class UserProfile(AbstractUser):
     email = models.EmailField(null=True, blank=True)
     STATUS_CHOICES = (
-        ('admin', 'admin'),
         ('owner', 'owner'),
         ('client', 'client'),
     )
@@ -34,10 +33,10 @@ class Hotel(models.Model):
     hotel_name = models.CharField(max_length=64)
     description = models.TextField()
     hotel_video = models.FileField(upload_to='hotel_videos')
-    country = models.ForeignKey(Country, on_delete=models.CASCADE)
-    city = models.ForeignKey(City, on_delete=models.CASCADE)
+    country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name='hotel_country')
+    city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='hotel_city')
     address = models.CharField(max_length=64)
-    hotel_stars = models.CharField(choices=STAR_CHOICES, max_length=4)
+    hotel_stars = models.IntegerField(choices=STAR_CHOICES)
     owner = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     created_date = models.DateField(auto_now_add=True)
 
@@ -60,7 +59,7 @@ class Review(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     hotel = models.ForeignKey(Hotel, on_delete=models.CASCADE, related_name='hotel_reviews')
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
-    stars = models.IntegerField(choices=STAR_CHOICES, max_length=4, null=True, blank=True)
+    stars = models.IntegerField(choices=STAR_CHOICES, null=True, blank=True)
     text = models.TextField(null=True, blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
 
@@ -69,6 +68,7 @@ class Review(models.Model):
 
 
 class Room(models.Model):
+    hotel = models.ForeignKey(Hotel, on_delete=models.CASCADE, related_name='hotel_room')
     room_number = models.PositiveSmallIntegerField()
     room_price = models.PositiveIntegerField()
     TYPE_CHOICES = (
@@ -79,16 +79,27 @@ class Room(models.Model):
     )
     room_type = models.CharField(choices=TYPE_CHOICES, default='однокомнатный', max_length=32)
     STATUS_CHOICES = (
-        ('свободный', 'свободный'),
-        ('забронировано', 'забронировано'),
-        ('занято', 'занято'),
+        ('свободен', 'свободен'),
+        ('забронирован', 'забронирован'),
+        ('занят', 'занят'),
     )
     room_status = models.CharField(choices=STATUS_CHOICES, default='свободный', max_length=32)
     all_inclusive = models.BooleanField(default=True)
 
+    def __str__(self):
+        return f'{self.room_number} {self.hotel}'
+
+
+class RoomImage(models.Model):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='room_images')
+    room_image = models.ImageField(upload_to='room_images')
+
+    def __str__(self):
+        return f'{self.room}'
+
 
 class Booking(models.Model):
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='user')
     status = models.CharField(choices=(('подтверждено', 'подтверждено'), ('отменено', 'отменено')), max_length=32)
     hotel = models.ForeignKey(Hotel, on_delete=models.CASCADE)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
@@ -96,23 +107,6 @@ class Booking(models.Model):
     check_out = models.DateField()
     total_price = models.PositiveIntegerField()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    def __str__(self):
+        return f'{self.hotel} {self.room} - {self.user}'
 

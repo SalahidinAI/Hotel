@@ -4,21 +4,8 @@ from .models import *
 from modeltranslation.admin import TranslationAdmin
 
 
-@admin.register(Country)
-class CountryAdmin(TranslationAdmin):
-    class Media:
-        js = (
-            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
-            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
-            'modeltranslation/js/tabbed_translation_fields.js',
-        )
-        css = {
-            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
-        }
-
-
-@admin.register(City)
-class CityAdmin(TranslationAdmin):
+@admin.register(Country, City)
+class CountryCityAdmin(TranslationAdmin):
     class Media:
         js = (
             'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
@@ -50,7 +37,16 @@ class HotelAdmin(TranslationAdmin):
         }
 
 
+class RoomImageInline(admin.TabularInline):
+    model = RoomImage
+    extra = 1
+
+
+class RoomAdmin(ModelAdmin):
+    inlines = [RoomImageInline]
+
+
 admin.site.register(UserProfile)
 admin.site.register(Review)
-admin.site.register(Room)
+admin.site.register(Room, RoomAdmin)
 admin.site.register(Booking)
