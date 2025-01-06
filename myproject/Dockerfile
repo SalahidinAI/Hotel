@@ -13,6 +13,3 @@ RUN pip install --upgrade pip && \
 COPY nginx/nginx.conf /etc/nginx/conf.d/
 
 COPY . /app/
-
-pip install gunicorn (обрабатывает HTTP-запросы и передает их вашему приложению)
-pip freeze > req.txt
