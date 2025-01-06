@@ -1,10 +1,11 @@
+from .filters import *
 from .serializers import *
 from .permissions import *
 from rest_framework import viewsets, generics, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.filters import SearchFilter
 
 
 class RegisterView(generics.CreateAPIView):
@@ -73,15 +74,14 @@ class CityListAPIView(generics.ListAPIView):
 class CityDetailAPIView(generics.RetrieveAPIView):
     queryset = City.objects.all()
     serializer_class = CityDetailSerializer
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_class = ['category', 'have', 'price']
-    search_fields = ['hotel_name']
-    ordering_fields = ['price']
 
 
 class HotelListAPIView(generics.ListAPIView):
     queryset = Hotel.objects.all()
     serializer_class = HotelListSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_class = HotelFilter  # Для фильтрации с помощью DjangoFilterBackend
+    search_fields = ['hotel_name']  # Поля для поиска
 
 
 class HotelDetailAPIView(generics.RetrieveAPIView):

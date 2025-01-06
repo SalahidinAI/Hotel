@@ -1,5 +1,5 @@
 from django_filters import FilterSet
-from .models import Hotel
+from .models import Hotel, Room
 
 
 class HotelFilter(FilterSet):
@@ -8,5 +8,5 @@ class HotelFilter(FilterSet):
         fields = {
             'country': ['exact'],
             'city': ['exact'],
-            'price': ['gt', 'lt']
         }
+
