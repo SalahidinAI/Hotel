@@ -14,5 +14,3 @@ class CheckOwner(permissions.BasePermission):
 class ClientBooking(permissions.BasePermission):
     def has_permission(self, request, view):
         return not request.user.user_status == 'owner'
-
-
