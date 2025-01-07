@@ -10,3 +10,10 @@ class HotelFilter(FilterSet):
             'city': ['exact'],
         }
 
+
+class RoomFilter(FilterSet):
+    class Meta:
+        model = Room
+        fields = {
+            'room_price': ['gt', 'lt']
+        }

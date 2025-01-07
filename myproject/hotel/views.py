@@ -5,11 +5,12 @@ from rest_framework import viewsets, generics, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = UserSerializer
+    permission_classes = [permissions.AllowAny]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -20,6 +21,7 @@ class RegisterView(generics.CreateAPIView):
 
 class CustomLoginView(TokenObtainPairView):
     serializer_class = LoginSerializer
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -80,8 +82,8 @@ class HotelListAPIView(generics.ListAPIView):
     queryset = Hotel.objects.all()
     serializer_class = HotelListSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_class = HotelFilter  # Для фильтрации с помощью DjangoFilterBackend
-    search_fields = ['hotel_name']  # Поля для поиска
+    filterset_class = HotelFilter
+    search_fields = ['hotel_name']
 
 
 class HotelDetailAPIView(generics.RetrieveAPIView):
@@ -92,7 +94,7 @@ class HotelDetailAPIView(generics.RetrieveAPIView):
 class HotelCreateViewSet(viewsets.ModelViewSet):
     queryset = Hotel.objects.all()
     serializer_class = HotelCreateSerializer
-    permission_classes = [CheckStatus]
+    permission_classes = [CheckOwner]
 
     def get_queryset(self):
         return Hotel.objects.filter(owner=self.request.user)
@@ -120,6 +122,9 @@ class HotelReviewDetailAPIView(generics.RetrieveAPIView):
 class RoomListViewSet(generics.ListAPIView):
     queryset = Room.objects.all()
     serializer_class = RoomListSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_class = RoomFilter
+    ordering_fields = ['room_price']
 
 
 class RoomDetailViewSet(generics.RetrieveAPIView):
@@ -130,7 +135,7 @@ class RoomDetailViewSet(generics.RetrieveAPIView):
 class RoomCreateViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
     serializer_class = RoomCreateSerializer
-    permission_classes = [CheckStatus]
+    permission_classes = [CheckOwner]
 
     def get_queryset(self):
         return Room.objects.filter(hotel__owner=self.request.user)
@@ -139,7 +144,7 @@ class RoomCreateViewSet(viewsets.ModelViewSet):
 class BookingAPIView(generics.ListAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
-    permission_classes =  [OwnerBooking]
+    permission_classes =  [CheckOwner]
 
     def get_queryset(self):
         return Booking.objects.filter(hotel__owner=self.request.user)
@@ -148,7 +153,7 @@ class BookingAPIView(generics.ListAPIView):
 class BookingCreateViewSet(viewsets.ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingCreateSerializer
-    permission_classes = [ClientBooking, CheckBooking]
+    permission_classes = [ClientBooking]
 
     def get_queryset(self):
         return Booking.objects.filter(user=self.request.user)
