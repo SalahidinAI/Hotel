@@ -170,6 +170,7 @@ class HotelDetailSerializer(serializers.ModelSerializer):
     owner = UserProfileSimpleSerializer()
     hotel_images = HotelImageSerializer(many=True, read_only=True)
     hotel_room = RoomListSerializer(many=True, read_only=True)
+    created_date = serializers.DateField(format('%m-%d-%Y'))
 
     class Meta:
         model = Hotel
